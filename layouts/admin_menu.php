@@ -58,4 +58,15 @@
         <li><a href="daily_sales.php">Ventas diarias</a> </li>
       </ul>
   </li>
+
+  <a href="#" class="submenu-toggle">
+      <i class="glyphicon glyphicon-signal"></i>
+       <span>Log de Venta</span>
+      </a>
+      <ul class="nav submenu">
+        <li><a href="List_order_sales.php">Ventas por fecha </a></li>
+        <!-- <li><a href="monthly_sales.php">Ventas mensuales</a></li>
+        <li><a href="daily_sales.php">Ventas diarias</a> </li> -->
+      </ul>
+  </li>
 </ul>
