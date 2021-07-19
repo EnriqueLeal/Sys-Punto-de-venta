@@ -1,5 +1,6 @@
 <?php
   require_once('includes/load.php');
+date_default_timezone_set('America/Monterrey');
 
 /*--------------------------------------------------------------*/
 /* Function for find all database table rows by table name
@@ -36,6 +37,20 @@ function find_by_id($table,$id)
             return null;
      }
 }
+//
+function find_by_location($table,$id)
+{
+  global $db;
+  $id = (int)$id;
+    if(tableExists($table)){
+          $sql = $db->query("SELECT latitud,lontitud,comparacion FROM {$db->escape($table)} WHERE id='{$db->escape($id)}' LIMIT 1");
+          if($result = $db->fetch_assoc($sql))
+            return $result;
+          else
+            return null;
+     }
+}
+//
 /*--------------------------------------------------------------*/
 /* Function for Delete data from table by id
 /*--------------------------------------------------------------*/
@@ -64,6 +79,7 @@ function count_by_id($table){
      return($db->fetch_assoc($result));
   }
 }
+
 /*--------------------------------------------------------------*/
 /* Determine if database table exists
 /*--------------------------------------------------------------*/
@@ -89,8 +105,8 @@ function tableExists($table){
     $result = $db->query($sql);
     if($db->num_rows($result)){
       $user = $db->fetch_assoc($result);
-      $password_request = sha1($password);
-      if($password_request === $password['password'] ){
+      $password_request = $password;
+      if($password_request === $password ){
         return $user['id'];
       }
     }
@@ -193,7 +209,7 @@ function tableExists($table){
             redirect('index.php', false);
       //if Group status Deactive
      elseif($login_level['group_status'] === '0'):
-           $session->msg('d','Este nivel de usaurio esta inactivo!');
+           $session->msg('d','Este nivel de usuario esta inactivo!');
            redirect('home.php',false);
       //cheackin log in User level and Require level is Less than or equal to
      elseif($current_user['user_level'] <= (int)$require_level):
@@ -215,6 +231,7 @@ function tableExists($table){
     $sql  .=" FROM products p";
     $sql  .=" LEFT JOIN categories c ON c.id = p.categorie_id";
     $sql  .=" LEFT JOIN media m ON m.id = p.media_id";
+    $sql  .=" WHERE quantity >= 1";
     $sql  .=" ORDER BY p.id ASC";
     return find_by_sql($sql);
 
@@ -273,10 +290,10 @@ function tableExists($table){
  /*--------------------------------------------------------------*/
  function find_higest_saleing_product($limit){
    global $db;
-   $sql  = "SELECT p.name, COUNT(s.product_id) AS totalSold, SUM(s.qty) AS totalQty";
+   $sql  = "SELECT p.name, COUNT(s.product_id) AS totalSold, SUM(s.qty) AS totalQty,s.price";
    $sql .= " FROM sales s";
    $sql .= " LEFT JOIN products p ON p.id = s.product_id ";
-   $sql .= " GROUP BY s.product_id";
+   $sql .= " GROUP BY s.product_id,s.price";
    $sql .= " ORDER BY SUM(s.qty) DESC LIMIT ".$db->escape((int)$limit);
    return $db->query($sql);
  }
@@ -332,7 +349,7 @@ function  dailySales($year,$month){
   $sql .= " FROM sales s";
   $sql .= " LEFT JOIN products p ON s.product_id = p.id";
   $sql .= " WHERE DATE_FORMAT(s.date, '%Y-%m' ) = '{$year}-{$month}'";
-  $sql .= " GROUP BY DATE_FORMAT( s.date,  '%e' ),s.product_id";
+  $sql .= " GROUP BY DATE_FORMAT( s.date,  '%e' ),s.product_id,p.sale_price,s.qty,s.date";
   return find_by_sql($sql);
 }
 /*--------------------------------------------------------------*/
@@ -350,5 +367,16 @@ function  monthlySales($year){
   $sql .= " ORDER BY date_format(s.date, '%c' ) ASC";
   return find_by_sql($sql);
 }
+/**
+ /*--------------------------------------------------------------*/
+ function find_higest_saleing_product2($limit){
+   global $db;
+   $sql  = "SELECT p.name, COUNT(s.product_id) AS totalSold, SUM(s.qty) AS totalQty";
+   $sql .= " FROM sales s";
+   $sql .= " LEFT JOIN products p ON p.id = s.product_id ";
+   $sql .= " GROUP BY s.product_id";
+   $sql .= " ORDER BY SUM(s.qty) DESC LIMIT ".$db->escape((int)$limit);
+   return $db->query($sql);
+ }
 
 ?>
